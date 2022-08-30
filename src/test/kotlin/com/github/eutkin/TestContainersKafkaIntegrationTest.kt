@@ -20,6 +20,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -76,13 +77,14 @@ class TestContainersKafkaIntegrationTest : TestPropertyProvider {
         client.send("Hi|Hi", "hi")
         client.send("Hi|Hi", "hi")
         client.send("Hi|Hi", "hi")
-        Thread.sleep(5000)
+
+        listener.latch.await(5, TimeUnit.SECONDS)
 
     }
 
 
     override fun getProperties(): MutableMap<String, String> = mutableMapOf(
-        "kafka.bootstrap.servers" to kafka.bootstrapServers,
+        "kafka.bootstrap.servers" to "localhost:${kafka.firstMappedPort}",
         "kafka.topic.name" to topicName,
         "kafka.enabled" to "true",
     )

@@ -1,0 +1,6 @@
+applicationType: messaging
+defaultPackage: com.github.eutkin
+testFramework: junit
+sourceLanguage: kotlin
+buildTool: maven
+features: [ annotation-api, app-name, jackson-databind, junit, kafka, kotlin, kotlin-application, kotlin-extension-functions, logback, maven, readme, shade, test-resources, yaml ]

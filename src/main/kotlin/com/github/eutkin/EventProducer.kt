@@ -21,12 +21,14 @@ class EventProducer(
 
     private val affinity = this.ignite.affinity<String>(this.topic)
 
-    fun send(key: String, value: String) {
+    fun send(key: String, value: String) : Long {
         val partition = this.affinity.partition(key)
         val producerRecord = ProducerRecord(this.topic, partition, key, value)
         val recordMetadata = this.producer.send(producerRecord).get()
         if (recordMetadata.hasOffset()) {
             log.info("Offset: {}", recordMetadata.offset())
+            return recordMetadata.offset()
         }
+        return 0
     }
 }

@@ -8,6 +8,7 @@ import org.apache.ignite.Ignition
 import org.apache.ignite.cache.CacheMode
 import org.apache.ignite.cache.affinity.AffinityKeyMapper
 import org.apache.ignite.cache.affinity.rendezvous.RendezvousAffinityFunction
+import org.apache.ignite.cache.query.ScanQuery
 import org.apache.ignite.configuration.CacheConfiguration
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin.AdminClient
@@ -47,7 +48,7 @@ class TestContainersKafkaIntegrationTest : TestPropertyProvider {
     }
 
     @Inject
-    lateinit var ignite : Ignite
+    lateinit var ignite: Ignite
 
     @Inject
     lateinit var listener: EventListener
@@ -58,7 +59,7 @@ class TestContainersKafkaIntegrationTest : TestPropertyProvider {
 
     @Test
     fun testItWorks() {
-       ignite.createCache(
+       val cache =  ignite.createCache(
             CacheConfiguration<String, String>(topicName)
                 .setCacheMode(CacheMode.PARTITIONED)
                 .setAffinity(RendezvousAffinityFunction(10, null))
@@ -74,11 +75,18 @@ class TestContainersKafkaIntegrationTest : TestPropertyProvider {
 
                 })
         )
-        client.send("Hi|Hi", "hi")
-        client.send("Hi|Hi", "hi")
-        client.send("Hi|Hi", "hi")
+        var count: Long
+        count = client.send("Hi1|Hi", "hi")
+        count = client.send("Hi2|Hi", "hi")
+
+        if (count > 0) {
+            count = client.send("Hi3|Hi-1", "hi")
+        }
+
 
         listener.latch.await(5, TimeUnit.SECONDS)
+
+        println(cache.query(ScanQuery<String, String>()).all)
 
     }
 
